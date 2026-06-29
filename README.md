@@ -48,6 +48,22 @@ $ curl -s localhost:8000/score -d '{"key":"gpu-util","value":99.0}' | jq
 }
 ```
 
+## How it flows
+
+```mermaid
+flowchart LR
+    A[Event source] --> B[Bounded queue]
+    B -->|backpressure when full| A
+    B --> C[Worker pool]
+    C --> D[EWMA detector]
+    D --> E{z-score over threshold?}
+    E -->|yes| F[Anomaly]
+    E -->|no| G[Normal value]
+    D --> M["Metrics p50/p95/p99"]
+    F --> S["Sink / websocket"]
+    G --> S
+```
+
 ## Getting started
 
 ```bash
